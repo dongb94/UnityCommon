@@ -19,6 +19,7 @@ public class UnityMotionCapture : MonoBehaviour
     public String AnimationSavePath;
     public String AnimationName;
     public int SampleRate = 30;
+    public bool UseQuerternion;
 
     // ui
     private Button _startButton;
@@ -138,7 +139,7 @@ public class UnityMotionCapture : MonoBehaviour
     
     private void SaveAnimation()
     {
-        AnimationWriter.MakeAnimation(AnimationSavePath,AnimationName, ref _capturedMotion);
+        AnimationWriter.MakeAnimation(AnimationSavePath,AnimationName,UseQuerternion, ref _capturedMotion);
         _capturedMotion.Clear();
     }
 }

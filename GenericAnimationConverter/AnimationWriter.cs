@@ -19,7 +19,7 @@ public class AnimationWriter
     }
     
     #region Make Animation File
-    public static void MakeAnimation(string AnimationSavePath, string AnimationName, ref MotionData data)
+    public static void MakeAnimation(string AnimationSavePath, string AnimationName, bool UseQuerternion, ref MotionData data)
     {
         Data = data;
         
@@ -36,10 +36,11 @@ public class AnimationWriter
                        "  m_Legacy: 0\n" +
                        "  m_Compressed: 0\n" +
                        "  m_UseHighQualityCurve: 1\n" +
-                       "  m_RotationCurves: []\n" +
+                       "  m_RotationCurves: " +
+                       (!UseQuerternion?" []\n":GetCurves(TransformPart.Rotation)) +
                        "  m_CompressedRotationCurves: []\n" +
                        "  m_EulerCurves:" +
-                       GetCurves(TransformPart.Euler) + 
+                       (UseQuerternion?" []\n":GetCurves(TransformPart.Euler)) + 
                        "  m_PositionCurves:" + 
                        GetCurves(TransformPart.Position) + 
                        "  m_ScaleCurves:" +
@@ -57,7 +58,7 @@ public class AnimationWriter
                         "    m_AdditiveReferencePoseClip: {fileID: 0}\n" +
                         "    m_AdditiveReferencePoseTime: 0\n" +
                         "    m_StartTime: 0\n" +
-                        "    m_StopTime: 1\n" +
+                        "    m_StopTime: " + Data.Time + "\n" +
                         "    m_OrientationOffsetY: 0\n" +
                         "    m_Level: 0\n" +
                         "    m_CycleOffset: 0\n" +
@@ -91,6 +92,7 @@ public class AnimationWriter
         {
             var newAnimation = File.Create(assetsPath + AnimationSavePath + "/" + AnimationName + ".anim");
             newAnimation.Write(buffer, 0, buffer.Length);
+            newAnimation.Close();
         }
         else
         {
@@ -129,12 +131,29 @@ public class AnimationWriter
                      "      serializedVersion: 2\n" +
                      "      m_Curve:\n";
 
-            foreach (var vector in vectors)
+            var checkDirection = Vector3.zero;
+            var checkVector = Vector3.zero;
+            for (int i = 0; i<vectors.Count; i++)
             {
+                var vector = vectors[i];
                 float x, y, z, w;
+
+                if (part == TransformPart.Euler || part == TransformPart.Rotation)
+                {
+                    if (checkVector != Vector3.zero)
+                    {
+                        vector.Vector3 = CheckSmoothRotation(checkVector, vector.Vector3, checkDirection);
+                        checkDirection.x = vector.Vector3.x > checkVector.x ? 1 : -1;
+                        checkDirection.y = vector.Vector3.y > checkVector.y ? 1 : -1;
+                        checkDirection.z = vector.Vector3.z > checkVector.z ? 1 : -1;
+                    }
+                    checkVector = vector.Vector3;
+                }
+                
                 if (useQuaternion)
                 {
-                    var quaternion = Quaternion.Euler(vector.Vector3);
+                    var vector3 = vector.Vector3;
+                    var quaternion = Quaternion.Euler(vector3);
                     x = quaternion.x;
                     y = quaternion.y;
                     z = quaternion.z;
@@ -169,4 +188,21 @@ public class AnimationWriter
     }
     
     #endregion
+
+    private static Vector3 CheckSmoothRotation(Vector3 from, Vector3 to, Vector3 direction)
+    {
+        var f = to;
+        if ((from.x - to.x > 180 && direction.x > 0) || from.x - to.x > 350) to.x += 360;
+        else if ((from.x - to.x < -180 && direction.x < 0) || from.x - to.x < -350) to.x -= 360;
+        if ((from.y - to.y > 180 && direction.y > 0)|| from.y - to.y > 350) to.y += 360;
+        else if ((from.y - to.y < -180 && direction.y < 0) || from.y - to.y < -350) to.y -= 360;
+        if ((from.z - to.z > 180 && direction.z > 0)  || from.z - to.z > 350) to.z += 360;
+        else if ((from.z - to.z < -180 && direction.z < 0)  || from.z - to.z < -350) to.z -= 360;
+        
+        //debug;
+        if(Math.Abs(from.x - to.x) > 100 || Math.Abs(from.y - to.y) > 100 || Math.Abs(from.z - to.z) > 100)
+            Debug.Log("x : "+ from.x +" > "+f.x+" > "+to.x + "\n" + "y : "+ from.y +" > "+f.y+" > "+to.y + "\n" + "z : "+ from.z +" > "+f.z+" > "+to.z + "\n");
+
+        return to;
+    }
 }

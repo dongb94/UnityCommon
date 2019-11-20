@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class MotionData
 {
+    public float Time;
     public Dictionary<string, Transform> CaptureTransforms;
     public Dictionary<string, TimeMotionData> TimeMotionDatas;
 
@@ -32,6 +33,7 @@ public class MotionData
 
     public void Capture(float time)
     {
+        if (time > Time) Time = time;
         foreach (var pair in CaptureTransforms)
         {
             var motionData = TimeMotionDatas[pair.Key];
