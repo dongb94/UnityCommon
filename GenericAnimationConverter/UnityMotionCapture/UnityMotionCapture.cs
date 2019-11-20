@@ -20,6 +20,7 @@ public class UnityMotionCapture : MonoBehaviour
     public String AnimationName;
     public int SampleRate = 30;
     public bool UseQuerternion;
+    public bool IgnoreScale;
 
     // ui
     private Button _startButton;
@@ -134,7 +135,7 @@ public class UnityMotionCapture : MonoBehaviour
     
     private void Recording()
     {
-        _capturedMotion.Capture(_lastCaptureTime-_startTime);
+        _capturedMotion.Capture(_lastCaptureTime-_startTime, IgnoreScale);
     }
     
     private void SaveAnimation()

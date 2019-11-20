@@ -31,7 +31,7 @@ public class MotionData
         });
     }
 
-    public void Capture(float time)
+    public void Capture(float time, bool ignoreScale = false)
     {
         if (time > Time) Time = time;
         foreach (var pair in CaptureTransforms)
@@ -47,6 +47,7 @@ public class MotionData
                 Time = time,
                 Vector3 = pair.Value.localEulerAngles
             });
+            if (ignoreScale) continue;
             motionData.Scale.Add(new VectorTimeSet()
             {
                 Time = time,

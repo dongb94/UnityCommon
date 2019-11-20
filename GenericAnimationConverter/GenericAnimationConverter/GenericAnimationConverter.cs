@@ -20,7 +20,6 @@ public class GenericAnimationConverter : MonoBehaviour
     public string AnimationClipPath;
     public string SaveFolderPath;
 
-    public ConvertFactor ConvertFactor;
     public List<TransformPair> ConvertModelParts;
 
     public Animation sample;
@@ -42,8 +41,8 @@ public class GenericAnimationConverter : MonoBehaviour
 
         foreach (var transformPair in ConvertModelParts)
         {
-            if(transformPair.New == null || transformPair.Old == null) continue;
-            ConvertPathPair.Add(GetTransformPath(transformPair.Old), GetTransformPath(transformPair.New));
+            if(transformPair.From == null || transformPair.To == null) continue;
+            ConvertPathPair.Add(GetTransformPath(transformPair.From), GetTransformPath(transformPair.To));
         }
 
         try
@@ -182,20 +181,5 @@ public class GenericAnimationConverter : MonoBehaviour
         if (path[path.Length - 1] == '/') path = path.Substring(0, path.Length - 1);
         return path;
     }
-}
-
-[Serializable]
-public class TransformPair
-{
-    public Transform Old;
-    public Transform New;
-}
-
-[Serializable]
-public class ConvertFactor
-{
-    public bool RootMotion;
-    public bool Rotation;
-    public bool Scale;
 }
 
