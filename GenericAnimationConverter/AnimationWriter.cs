@@ -88,7 +88,7 @@ public class AnimationWriter
             Directory.CreateDirectory(assetsPath + AnimationSavePath);
         }
                 
-        if (!File.Exists(assetsPath + AnimationSavePath + AnimationName))
+        if (!File.Exists(assetsPath + AnimationSavePath + "/" + AnimationName))
         {
             var newAnimation = File.Create(assetsPath + AnimationSavePath + "/" + AnimationName + ".anim");
             newAnimation.Write(buffer, 0, buffer.Length);

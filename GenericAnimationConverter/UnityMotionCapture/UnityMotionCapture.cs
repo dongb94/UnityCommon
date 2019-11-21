@@ -20,6 +20,7 @@ public class UnityMotionCapture : MonoBehaviour
     public String AnimationName;
     public int SampleRate = 30;
     public bool UseQuerternion;
+    public bool IgnoreRootTransform;
     public bool IgnoreScale;
 
     // ui
@@ -40,7 +41,7 @@ public class UnityMotionCapture : MonoBehaviour
     {
         _capturedMotion = new MotionData();
         
-        _startButton = FindObjectOfType<Button>();
+        _startButton = GameObject.Find("CaptureButton")?.GetComponent<Button>();
         if (_startButton == null) // UI세팅이 안되있는 경우
         {
             _startButton = new GameObject("Button").AddComponent<Button>();
@@ -72,7 +73,7 @@ public class UnityMotionCapture : MonoBehaviour
             _text.fontSize = 20;
             _text.font =Font.CreateDynamicFontFromOSFont("Arial", 20);
         }
-        _text.text = "Start";
+        _text.text = "Capture";
         if (!FindObjectOfType<EventSystem>())
         {
             var eventSystem = new GameObject("EventSystem");
@@ -129,6 +130,7 @@ public class UnityMotionCapture : MonoBehaviour
         var captureParts = CaptureGameObject.transform.GetComponentsInChildren<Transform>();
         foreach (var trs in captureParts)
         {
+            if(IgnoreRootTransform && trs.Equals(CaptureGameObject.transform)) continue;
             _capturedMotion.AddTransform(trs);
         }
     }

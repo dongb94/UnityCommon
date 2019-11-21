@@ -58,6 +58,7 @@ public class MotionData
 
     public void Clear()
     {
+        Time = 0;
         CaptureTransforms.Clear();
         TimeMotionDatas.Clear();
     }
