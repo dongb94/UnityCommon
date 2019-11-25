@@ -1,12 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SmoothCamera : MonoBehaviour
 {
     public Transform Target;
-    public float Radius;
-    public Vector3 CameraPosition;
+    [SerializeField]
+    private float Radius;
+    [SerializeField][Range(0,1)]
+    private float CameraSpeed;
+    [SerializeField]
+    private Vector3 CameraPosition;
     
     // Update is called once per frame
     void LateUpdate()
@@ -15,13 +20,18 @@ public class SmoothCamera : MonoBehaviour
         var magnitude = direction.magnitude;
         var difference = magnitude - Radius;
 
-        if (magnitude > 0f)
+        if (difference > 0f)
         {
-            transform.position = Target.position + direction.normalized * Radius + CameraPosition;
+            transform.position = Target.position + direction.normalized * (Radius - 0.01f) + CameraPosition;
         }
-        else if (magnitude > -0.1f)
+        else// if (difference > -0.1f)
         {
-            transform.position -= direction * 0.1f + CameraPosition;
+            transform.position -= direction * CameraSpeed;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position - CameraPosition, Radius);
     }
 }
