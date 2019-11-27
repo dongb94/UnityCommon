@@ -4,6 +4,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
+/// Capture object motion of unity, and make that to animation clip
+///
+/// 
 /// 유니티 상의 동작을 캡쳐해 에니메이션 파일로 만들어 줍니다.
 /// 선택된 게임 오브젝트 기준으로 모든 자식의 Transform을 캡쳐합니다.
 /// 기본 저장 경로는 프로젝트의 Assets폴더입니다.
@@ -19,7 +22,7 @@ public class UnityMotionCapture : MonoBehaviour
     public String AnimationSavePath;
     public String AnimationName;
     public int SampleRate = 30;
-    public bool UseQuerternion;
+    public bool UseQuarternion;
     public bool IgnoreRootTransform;
     public bool IgnoreScale;
 
@@ -142,7 +145,7 @@ public class UnityMotionCapture : MonoBehaviour
     
     private void SaveAnimation()
     {
-        AnimationWriter.MakeAnimation(AnimationSavePath,AnimationName,UseQuerternion, ref _capturedMotion);
+        AnimationWriter.MakeAnimation(AnimationSavePath,AnimationName,UseQuarternion, ref _capturedMotion);
         _capturedMotion.Clear();
     }
 }

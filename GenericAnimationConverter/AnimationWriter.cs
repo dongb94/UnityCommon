@@ -10,7 +10,7 @@ public class AnimationWriter
     public static int SampleRate = 30;
     private static MotionData Data;
 
-    enum TransformPart
+    private enum TransformPart
     {
         Position,
         Rotation,
@@ -96,7 +96,7 @@ public class AnimationWriter
         }
         else
         {
-            Debug.LogErrorFormat("{0} 경로에 파일이 이미 존재합니다.", AnimationName);
+            Debug.LogErrorFormat("Collision File. : {0} ", AnimationName);
         }
     }
     

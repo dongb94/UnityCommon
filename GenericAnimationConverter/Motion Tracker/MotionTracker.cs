@@ -9,8 +9,8 @@ public class MotionTracker : MonoBehaviour
     private float ScaleFacter = 1.0f;
     [SerializeField][Range(-100.0f,100.0f)]
     private float ShowDistance = 1.0f;
-    [SerializeField][Tooltip("복사하려는 오브젝트의 루트 트렌스폼")] private Transform Actor;
-    [SerializeField][Tooltip("따라하는 오브젝트의 루트 트렌스폼")] private Transform Tracker;
+    [SerializeField][Tooltip("root transform of original")] private Transform Actor;
+    [SerializeField][Tooltip("root transform of copy")] private Transform Tracker;
     [SerializeField] private List<TransformPair> TrackList;
 
     private void Update()

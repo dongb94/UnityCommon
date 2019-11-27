@@ -19,7 +19,7 @@ public class MotionData
         var path = GetTransformPath(trs);
         if (CaptureTransforms.ContainsKey(path))
         {
-            Debug.LogErrorFormat("경로가 같은 오브젝트가 존재합니다. : {0}", path);
+            Debug.LogErrorFormat("objects collision. : {0}\nyou should use different name", path);
             throw new ArgumentException();
         }
         CaptureTransforms.Add(path,trs);
