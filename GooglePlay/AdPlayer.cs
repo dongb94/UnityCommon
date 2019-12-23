@@ -1,4 +1,8 @@
-﻿using System;
+/* 유니티 구글 ADMOB 메뉴얼
+* https://developers.google.com/admob/unity/start?hl=ko
+*/
+
+using System;
 using UnityEngine;
 using GoogleMobileAds;
 using GoogleMobileAds.Api;
