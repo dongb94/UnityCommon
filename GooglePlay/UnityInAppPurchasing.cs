@@ -63,6 +63,8 @@ public class UnityInAppPurchasing : Singleton<UnityInAppPurchasing> , IStoreList
             // 서버에 영수증 전송
         }
 
+        // Complete = 즉시 완료 메세지를 Google에 보내고 거래를 완료한다.
+        // Pending = ConfirmPendingPurchase 메소드를 통해 결제 완료를 알릴때 까지 대기한다.
         return PurchaseProcessingResult.Complete;
         
     }
