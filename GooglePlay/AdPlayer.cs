@@ -4,19 +4,44 @@
 using System;
 using UnityEngine;
 using GoogleMobileAds.Api;
+using UnityEngine.UI;
 
-public class AdPlayer : MonoBehaviour
+/// <summary>
+/// 구글 광고를 다루는 클레스
+/// </summary>
+public class GoogleAdMob
 {
-    public bool isTest;
+    public bool isTest; // 테스트 플레그 (true시 실재 광고 안나옴)
+    public Text textOutput; // 베너광고용 테스트 텍스트
+    
+    private static GoogleAdMob instance;
 
-    private const string AdID = "ca-app-pub-****************/**********"; // 앱에 개제하려는 광고단위의 ID
+    private const string InterstitialAdID = "ca-app-pub-****************/**********";// 전면 광고 ID
+    private const string BannerAdID = "ca-app-pub-****************/**********"; // 베너 광고 ID
+    private const string RewardedAdID = "ca-app-pub-****************/**********"; // 보상형 광고 ID
 
     private InterstitialAd _interstitialAd; // 전면 광고 객체
     private BannerView _bannerView; // 베너 광고 객체
     private RewardedAd _rewardedAd; // 보상형 광고 객체
+    private bool _isBannerViewLoaded;
+
+    public int bannerX=170, bannerY=280; // 베너광고 위치
+    public float ScreenSize; // 스크린 배율
     
     private string _unitID;
 
+    public static GoogleAdMob Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                new GoogleAdMob();
+            }
+            return instance;
+        }
+    }
+    
     private string AppId  
     {
         get
@@ -24,23 +49,32 @@ public class AdPlayer : MonoBehaviour
             if (isTest)
             {
 #if UNITY_ANDROID
-                return "ca-app-pub-3940256099942544~3347511713"; // 테스트 앱 ID
+                return "ca-app-pub-3940256099942544~3347511713"; // 안드로이드 테스트 앱 ID
 #elif UNITY_IPHONE
-            return "ca-app-pub-3940256099942544~1458002511"; // 테스트 앱 ID
+                return "ca-app-pub-3940256099942544~1458002511"; // mac os 테스트 앱 ID
 #else
-            return "unexpected_platform";
+                return "unexpected_platform";
 #endif                
             }
             else
             {
-                return "ca-app-pub-****************~**********"; // 앱의 ID
+                return "ca-app-pub-3299070289462023~8946188559"; // 앱의 ID
             }
         }
     }
-    
-    private void Awake()
+
+    private GoogleAdMob()
     {
+        ///// 서비스시 주석처리 //////
+        isTest = true;
+        ////////////////////////////
+        
+        instance = this;
         MobileAds.Initialize(AppId);
+        LoadRewardedAd();
+        LoadBannerAd();
+        ScreenSize = MobileAds.Utils.GetDeviceScale();
+        if (ScreenSize < 0.1) ScreenSize = 1;
     }
 
     /// <summary>
@@ -60,12 +94,13 @@ public class AdPlayer : MonoBehaviour
             _unitID = "ca-app-pub-3940256099942544/4411468910"; // Test ID
 #else
             _unitID = "unexpected_platform";
+            return;
 #endif
         }
         else
         {
             request = new AdRequest.Builder().Build();
-            _unitID = AdID;
+            _unitID = InterstitialAdID;
         }
         
         // 전면광고 객체 생성
@@ -98,18 +133,22 @@ public class AdPlayer : MonoBehaviour
             _unitID = "ca-app-pub-3940256099942544/2934735716"; // Test ID
 #else
             _unitID = "unexpected_platform";
+            return;
 #endif
         }
         else
         {
             request = new AdRequest.Builder().Build();
-            _unitID = AdID;
+            _unitID = BannerAdID;
         }
+
+        // 광고 크기 설정
+        var width = (Screen.width * 0.625)/MobileAds.Utils.GetDeviceScale();
+        var height = (Screen.height * 0.12)/MobileAds.Utils.GetDeviceScale();
         
-        // BannerView 객체 생성
-        _bannerView = new BannerView(_unitID, AdSize.Banner, AdPosition.Top); // 기본 값 사용
-        // _bannerView = new BannerView(_unitID, new AdSize(250,250), 0, 50); // 맞춤 설정 (광고 사이즈 및 위치)
-        
+        //_bannerView = new BannerView(_unitID, AdSize.Banner, AdPosition.Bottom); // 기본으로 제공하는 값을 통해 위치 설정
+        _bannerView = new BannerView(_unitID, AdSize.GetLandscapeAnchoredAdaptiveBannerAdSizeWithWidth((int)width), bannerX, bannerY); // 맞춤 설정 (광고 사이즈 및 위치)
+
         // 로드 실패시의 이벤트 추가
         _bannerView.OnAdFailedToLoad += (sender, args) =>
         {
@@ -117,6 +156,11 @@ public class AdPlayer : MonoBehaviour
             Debug.Log("Banner AD is not Loaded");
 #endif
         };
+        _bannerView.OnAdLoaded += (sender, args) =>
+        {
+            _isBannerViewLoaded = true;
+            _bannerView.Show();
+        }; 
 
         // 베너 광고 로드
         _bannerView.LoadAd(request);
@@ -139,12 +183,13 @@ public class AdPlayer : MonoBehaviour
             _unitID = "ca-app-pub-3940256099942544/1712485313"; // Test ID
 #else
             _unitID = "unexpected_platform";
+            return;
 #endif
         }
         else
         {
             request = new AdRequest.Builder().Build();
-            _unitID = AdID;
+            _unitID = RewardedAdID;
         }
         
         // 보상형광고 객체 생성
@@ -172,8 +217,10 @@ public class AdPlayer : MonoBehaviour
     
     public void PlayBannerAd()
     {
-        LoadBannerAd();
-        _bannerView.Show();
+        if(!_isBannerViewLoaded)
+            LoadBannerAd();
+        else
+            _bannerView.Show();
     }
 
     public void PlayRewardedAd()
@@ -185,24 +232,35 @@ public class AdPlayer : MonoBehaviour
         }
         _rewardedAd.Show();
     }
-    
-    public void OnInterstitialAdClosed(object sender, EventArgs args)
+
+    private void OnInterstitialAdClosed(object sender, EventArgs args)
     {
         Debug.Log("HandleOnInterstitialAdClosed event received.");
         // 전면 광고를 닫을 때 메모리 절약을 위해 객체를 제거한다.
         _interstitialAd.Destroy();
     }
 
-    public void OnMoveOtherScene()
+    public void OnRemoveBannerAdScene()
     {
         // 베너 광고가 없는 화면으로 넘어 갈 때 호출해 메모리 절약을 위해 객체를 제거한다.
+        if (!_isBannerViewLoaded) return;
+        _isBannerViewLoaded = false;
         _bannerView.Destroy();
     }
-    
-    public void OnRewardedAdClosed(object sender, EventArgs args)
+
+    private void OnRewardedAdClosed(object sender, EventArgs args)
     {
         Debug.Log("HandleOnRewardedAdClosed event received.");
         // 보상형 광고는 1회용 객체로 한번 표시된 후에 파괴된다. 다른 보상형 광고를 보기 위해서는 새로 로드 해야한다.
+    }
+
+    /// <summary>
+    /// 화면의 위치를 기반으로 베너광고의 위치를 설명한다. (pixel 단위)
+    /// </summary>
+    public void SetBannerPosition(int x, int y)
+    {
+        bannerX = (int)(x / ScreenSize);
+        bannerY = (int)(y / ScreenSize);
     }
 
 }
