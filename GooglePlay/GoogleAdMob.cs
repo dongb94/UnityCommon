@@ -23,6 +23,7 @@ public class GoogleAdMob
     private InterstitialAd _interstitialAd; // 전면 광고 객체
     private BannerView _bannerView; // 베너 광고 객체
     private RewardedAd _rewardedAd; // 보상형 광고 객체
+    private bool _isOnPlayBannerView;
     private bool _isBannerViewLoaded;
 
     public int bannerX=170, bannerY=280; // 베너광고 위치
@@ -159,8 +160,12 @@ public class GoogleAdMob
         _bannerView.OnAdLoaded += (sender, args) =>
         {
             _isBannerViewLoaded = true;
-            _bannerView.Show();
+            if (_isOnPlayBannerView)
+                _bannerView.Show();
+            else
+                _bannerView.Hide();
         }; 
+        _bannerView.Hide(); // 기본 = 숨김상태
 
         // 베너 광고 로드
         _bannerView.LoadAd(request);
@@ -217,10 +222,10 @@ public class GoogleAdMob
     
     public void PlayBannerAd()
     {
-        if(!_isBannerViewLoaded)
-            LoadBannerAd();
-        else
-            _bannerView.Show();
+//        if(!_isBannerViewLoaded)
+//            LoadBannerAd();
+        _isOnPlayBannerView = true;
+        _bannerView.Show();
     }
 
     public void PlayRewardedAd()
@@ -242,10 +247,16 @@ public class GoogleAdMob
 
     public void OnRemoveBannerAdScene()
     {
-        // 베너 광고가 없는 화면으로 넘어 갈 때 호출해 메모리 절약을 위해 객체를 제거한다.
+        _isOnPlayBannerView = false;
+        
+        // 베너광고를 제거하지 않고 숨긴다.
         if (!_isBannerViewLoaded) return;
-        _isBannerViewLoaded = false;
-        _bannerView.Destroy();
+            _bannerView.Hide();
+        
+//        // 베너 광고가 없는 화면으로 넘어 갈 때 호출해 메모리 절약을 위해 객체를 제거한다.
+//        if (!_isBannerViewLoaded) return;
+//        _isBannerViewLoaded = false;
+//        _bannerView.Destroy();
     }
 
     private void OnRewardedAdClosed(object sender, EventArgs args)
