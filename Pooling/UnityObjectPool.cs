@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using k514;
+using k514.Extra;
 using UI2020;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ using UnityEngine;
 namespace BDG
 {
     /// 유니티 기본 컴포넌트들를 풀링하는데 쓰는 클레스
+    /// <para>풀링할 오브젝트들의 부모가 될 오브젝트에 <c>AddComponent</c>를 통해 붙이고, 수동으로 <see cref="Initialize()"/>함수를 호출해 초기화 해야한다.</para>
     public abstract class UnityObjectPool<T> : MonoBehaviour where T : MonoBehaviour
     {
         private Stack<T> _pool;
@@ -16,18 +18,11 @@ namespace BDG
         protected abstract void OnCreate(T obj);
         protected abstract void OnActive(T obj);
         protected abstract void OnPooled(T obj);
-
-        private void Awake()
+        
+        public virtual UnityObjectPool<T> Initialize()
         {
             _pool = new Stack<T>();
-        }
-
-        public UnityObjectPool(int minSize)
-        {
-            for (var i = 0; i < minSize; i++)
-            {
-                CreateObject();
-            }
+            return this;
         }
 
         ~UnityObjectPool()
@@ -63,25 +58,30 @@ namespace BDG
         }
     }
 
+    /// <summary>
+    /// 스크립트가 없는 게임 오브젝트 프리펩을 관리한다.
+    /// </summary>
+    /// <remarks>
+    /// <para>풀링할 오브젝트들의 부모가 될 오브젝트에 <c>AddComponent</c>를 통해 붙이고, 수동으로 <see cref="Initialize()"/>함수를 호출해 초기화 해야한다.</para>
+    /// <para>초기화시 <c>prefabName</c>을 반드시 지정해 줘야 한다.</para>
+    /// </remarks>
     public abstract class UnityPrefabObjectPool : MonoBehaviour
     {
+        /// <summary>
+        /// 초기화시 프리펩 이름 반드시 정해줘야함
+        /// </summary>
         public string prefabName;
 
         private Stack<GameObject> _pool;
 
-        /// <summary>
-        /// 초기화시 프리펩 이름 반드시 정해줘야함
-        /// </summary>
-        protected abstract void Initialize();
         protected abstract void OnCreate(GameObject obj);
         protected abstract void OnActive(GameObject obj);
         protected abstract void OnPooled(GameObject obj);
 
-
-        protected virtual void Awake()
+        public virtual UnityPrefabObjectPool Initialize()
         {
             _pool = new Stack<GameObject>();
-            Initialize();
+            return this;
         }
 
         protected virtual void OnDestroy()
@@ -117,21 +117,31 @@ namespace BDG
         }
     }
     
+    /// <summary>
+    /// 프리펩 리소스에 <c>T</c>컴포넌트를 붙이고 관리한다.
+    /// </summary>
+    /// <remarks>
+    /// <para>풀링할 오브젝트들의 부모가 될 오브젝트에 <c>AddComponent</c>를 통해 붙이고, 수동으로 <see cref="Initialize()"/>함수를 호출해 초기화 해야한다.</para>
+    /// <para>초기화시 <c>prefabName</c>을 반드시 지정해 줘야 한다.</para>
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
     public abstract class UnityPrefabObjectPool<T> : MonoBehaviour where T : MonoBehaviour
     {
+        /// <summary>
+        /// 초기화시 프리펩 이름 반드시 정해줘야함
+        /// </summary>
         public string prefabName;
 
         private Stack<T> _pool;
 
-        protected abstract void Initialize();
         protected abstract void OnCreate(T obj);
         protected abstract void OnActive(T obj);
         protected abstract void OnPooled(T obj);
 
-        protected virtual void Awake()
+        public virtual UnityPrefabObjectPool<T> Initialize()
         {
             _pool = new Stack<T>();
-            Initialize();
+            return this;
         }
 
         protected virtual void OnDestroy()
@@ -157,10 +167,13 @@ namespace BDG
             _pool.Push(obj);
         }
 
-        private async Task CreateObject()
+        private void CreateObject()
         {
-            var prefabObj = await LoadAssetManager.GetInstance.LoadAssetAsync<GameObject>(ResourceType.GameObjectPrefab, ResourceLifeCycleType.WholeGame, prefabName);
+            // AssetCacheMgr.GetResource(prefabName, preset => {});
+            var prefabObj = LoadAssetManager.GetInstance.LoadAsset<GameObject>(ResourceType.GameObjectPrefab, ResourceLifeCycleType.WholeGame, prefabName);
             var obj = Instantiate(prefabObj, transform).AddComponent<T>();
+            if(prefabObj == null)
+                Debug.LogError($"Resource Load Error : {prefabName}");
             //var obj = Instantiate(Resources.Load<GameObject>(prefabName),transform).AddComponent<T>(); // 임시
             OnCreate(obj);
             OnPooled(obj);
