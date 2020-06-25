@@ -9,9 +9,9 @@ namespace k514
     {
         #region <Fields>
 
-        private int[] _knightBaseEquipKey = new[] {22001, 22002, 22003, 22004, 22005};
-        private int[] _archerBaseEquipKey = new[] {23001, 23002, 23003, 23004, 23005};
-        private int[] _magicianBaseEquipKey = new[] {24001, 24002, 24003, 24004, 24005};
+        private int[] _knightBaseEquipKey = new[] {22001, 22002, 22003, 22004, 22005, 22006};
+        private int[] _archerBaseEquipKey = new[] {23001, 23002, 23003, 23004, 23005, 23006};
+        private int[] _magicianBaseEquipKey = new[] {24001, 24002, 24003, 24004, 24005, 24006};
         
         private LamierePlayer _MasterNode;
         private ItemMeshChanger _meshChanger;
@@ -80,9 +80,17 @@ namespace k514
             {
                 if (targetRecord != null)
                 {
+                    if (!_MeshWrapperCollection.ContainsKey(targetRecord.TargetPartType))
+                    {
+                        Debug.LogError($"mesh wrapper is not setting : {targetRecord.TargetPartType}");
+                        return false;
+                    }
+                    
                     var wrapper = _MeshWrapperCollection[targetRecord.TargetPartType];
+
                     if (!wrapper.Equip(targetRecord.ItemLevel))
                     {
+                        // 목표 장비가 생성되있지 않은 경우
                         var asset = LoadAssetManager.GetInstance.LoadAsset<GameObject>(ResourceType.GameObjectPrefab,
                             ResourceLifeCycleType.Scene, targetRecord.PrefabName);
                         var equipObject = GameObject.Instantiate(asset, wrapper.transform);
@@ -91,6 +99,7 @@ namespace k514
                         foreach (var content in wrapper.contentGroup[targetRecord.ItemLevel])
                         {
                             _meshChanger.ApplyMeshRenderer(content.SkinnedMeshRenderer);
+                            content.Transform.gameObject.layer = 12; // 장비 레이어 설정
                         }
 
                         wrapper.Equip(targetRecord.ItemLevel);
