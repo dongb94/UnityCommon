@@ -28,8 +28,8 @@ public class BundleVersionHandler
     private int SelectedServerNum;
     private string[] serverURL =
     {
-        "http://211.180.114.22/PuccaAssetBundle/",
-        "http://211.180.114.33/PuccaAssetBundle/"
+        "http://***.***.***.22/PuccaAssetBundle/",
+        "http://***.***.***.33/PuccaAssetBundle/"
     };
 
     public static BundleVersionHandler Instance => _instance??new BundleVersionHandler();
