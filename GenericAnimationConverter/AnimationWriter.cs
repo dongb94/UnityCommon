@@ -10,7 +10,7 @@ public class AnimationWriter
     public static int SampleRate = 30;
     private static MotionData Data;
 
-    private enum TransformPart
+    enum TransformPart
     {
         Position,
         Rotation,
@@ -192,14 +192,14 @@ public class AnimationWriter
     private static Vector3 CheckSmoothRotation(Vector3 from, Vector3 to, Vector3 direction)
     {
         var f = to;
-        if ((from.x - to.x > 180 && direction.x > 0) || from.x - to.x > 330) to.x += 360;
-        else if ((from.x - to.x < -180 && direction.x < 0) || from.x - to.x < -330) to.x -= 360;
-        if ((from.y - to.y > 180 && direction.y > 0)|| from.y - to.y > 330) to.y += 360;
-        else if ((from.y - to.y < -180 && direction.y < 0) || from.y - to.y < -330) to.y -= 360;
-        if ((from.z - to.z > 180 && direction.z > 0)  || from.z - to.z > 330) to.z += 360;
-        else if ((from.z - to.z < -180 && direction.z < 0)  || from.z - to.z < -330) to.z -= 360;
+        if ((from.x - to.x > 180 && direction.x > 0) || from.x - to.x > 300) to.x += 360;
+        else if ((from.x - to.x < -180 && direction.x < 0) || from.x - to.x < -300) to.x -= 360;
+        if ((from.y - to.y > 180 && direction.y > 0)|| from.y - to.y > 300) to.y += 360;
+        else if ((from.y - to.y < -180 && direction.y < 0) || from.y - to.y < -300) to.y -= 360;
+        if ((from.z - to.z > 180 && direction.z > 0)  || from.z - to.z > 300) to.z += 360;
+        else if ((from.z - to.z < -180 && direction.z < 0)  || from.z - to.z < -300) to.z -= 360;
         
-        //debug;
+        //debug
         if(Math.Abs(from.x - to.x) > 100 || Math.Abs(from.y - to.y) > 100 || Math.Abs(from.z - to.z) > 100)
             Debug.Log("x : "+ from.x +" > "+f.x+" > "+to.x + "\n" + "y : "+ from.y +" > "+f.y+" > "+to.y + "\n" + "z : "+ from.z +" > "+f.z+" > "+to.z + "\n");
 

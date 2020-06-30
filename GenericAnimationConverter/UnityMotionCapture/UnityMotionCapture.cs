@@ -22,7 +22,7 @@ public class UnityMotionCapture : MonoBehaviour
     public String AnimationSavePath;
     public String AnimationName;
     public int SampleRate = 30;
-    public bool UseQuarternion;
+    public bool UseQuerternion;
     public bool IgnoreRootTransform;
     public bool IgnoreScale;
 
@@ -145,7 +145,7 @@ public class UnityMotionCapture : MonoBehaviour
     
     private void SaveAnimation()
     {
-        AnimationWriter.MakeAnimation(AnimationSavePath,AnimationName,UseQuarternion, ref _capturedMotion);
+        AnimationWriter.MakeAnimation(AnimationSavePath,AnimationName,UseQuerternion, ref _capturedMotion);
         _capturedMotion.Clear();
     }
 }

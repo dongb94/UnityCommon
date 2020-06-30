@@ -21,8 +21,9 @@ public class MotionTracker : MonoBehaviour
         foreach (var list in TrackList)
         {
             if (list.From == null || list.To == null || list.UnTrack) continue; 
-            list.To.position = list.From.position * ScaleFacter + distance;
+            list.To.position = list.From.position * ScaleFacter + distance + list.AdjustmentPosition;
             list.To.rotation = list.From.rotation;
+            list.To.Rotate(list.AdjustmentRotation.x, list.AdjustmentRotation.y, list.AdjustmentRotation.z);
         }
     }
 }
@@ -33,4 +34,6 @@ public class TransformPair
     public bool UnTrack;
     public Transform From;
     public Transform To;
+    public Vector3 AdjustmentRotation;
+    public Vector3 AdjustmentPosition;
 }

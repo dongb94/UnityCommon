@@ -1,5 +1,5 @@
 
-Unity Motion Capture v1.0.2
+Unity Motion Capture v1.1.0
 
 1. Add 'Unity Motion Capture' script to Scene
 2. Fill inspector of 'Unity Motion Capture'
@@ -14,4 +14,13 @@ Unity Motion Capture v1.0.2
 4. Click 'capture' button to start capture object
 5. Click 'recoding' button to stop capture and save animation file
 
-Large animation clips can cause Unity to freeze momentarily.    
+Large animation clips can cause Unity to freeze momentarily.
+
+
+
+GUI 구성 목표
+
+트렌스폼 리스트 만들기
+카메라 프리뷰를 구성, 에니메이션을 넣어서 컨트롤 할 수 있다.
+
+다 끝나면 로고 넣기
