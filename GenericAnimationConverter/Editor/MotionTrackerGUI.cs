@@ -22,6 +22,7 @@ public class MotionTrackerGUI : EditorWindow
     private void Awake()
     {
         _scaleDelta = 1f;
+        _tl = new List<Transform>();
     }
 
     [MenuItem("AnimationConverter/MotionTracker")]
@@ -43,53 +44,33 @@ public class MotionTrackerGUI : EditorWindow
 
         _transformListSize = EditorGUILayout.IntField("Track List Size", _transformListSize);
         
+        ListSizeChange();
+        
         using (var scrollView = new EditorGUILayout.ScrollViewScope(_scrollPos))
         {
             _scrollPos = scrollView.scrollPosition;
-            EditorGUILayout.ObjectField("Transform", null, typeof(List<Transform>), true);
+            for (int i = 0; i < _transformListSize; i++)
+            {
+                _tl[i] = EditorGUILayout.ObjectField("Transform", _tl[i], typeof(Transform), true) as Transform;
+            }
         }
     }
-    
-}
 
-
-public class MyWindow : EditorWindow
-{
-    AnimBool m_ShowExtraFields;
-    string m_String;
-    Color m_Color = Color.white;
-    int m_Number = 0;
-
-    [MenuItem("Window/My Window")]
-    static void Init()
+    private void ListSizeChange()
     {
-        MyWindow window = (MyWindow)EditorWindow.GetWindow(typeof(MyWindow));
-        window.Show();
-    }
-
-    void OnEnable()
-    {
-        m_ShowExtraFields = new AnimBool(true);
-        m_ShowExtraFields.valueChanged.AddListener(new UnityAction(base.Repaint));
-    }
-
-    void OnGUI()
-    {
-        m_ShowExtraFields.target = EditorGUILayout.ToggleLeft("Show extra fields", m_ShowExtraFields.target);
-
-        //Extra block that can be toggled on and off.
-        using (var group = new EditorGUILayout.FadeGroupScope(m_ShowExtraFields.faded))
+        if (_transformListSize == _tl.Count) return;
+        if (_transformListSize < _tl.Count)
         {
-            if (group.visible)
+            while (_transformListSize != _tl.Count)
             {
-                EditorGUI.indentLevel++;
-                EditorGUILayout.PrefixLabel("Color");
-                m_Color = EditorGUILayout.ColorField(m_Color);
-                EditorGUILayout.PrefixLabel("Text");
-                m_String = EditorGUILayout.TextField(m_String);
-                EditorGUILayout.PrefixLabel("Number");
-                m_Number = EditorGUILayout.IntSlider(m_Number, 0, 10);
-                EditorGUI.indentLevel--;
+                _tl.RemoveAt(_tl.Count - 1);
+            }
+        }
+        else
+        {
+            while (_transformListSize != _tl.Count)
+            {
+                _tl.Add(null);
             }
         }
     }
