@@ -23,33 +23,20 @@ public class DamageUI : UIManagerBase
         Hurt,
         Normal
     }
-    
+
     private const int FloatTime = 2;
     private const int FloatingHeight = 120;
     private const int Interval = 30;
     private const float CritEffectSize = 1.5f;
-
-    private Queue<Image> objectPool;
-    private Queue<Image> activeGroup;
 
     private Queue<GameObject> FontWrapper;
 
     private void Awake()
     {
         Instance = this;
-        damageFont = Resources.LoadAll<Sprite>("UI2020/Sprites/FontImage/DamageFontSprite"); // TODO 개선 해야함
-        objectPool = new Queue<Image>();
-        activeGroup = new Queue<Image>();
+        damageFont = Resources.LoadAll<Sprite>("UI2020/Sprites/FontImage/DamageFontSprite2"); // TODO 개선 해야함
         gameObject.AddComponent<DamageUIWrapperPoolingManager>().Initialize();
         gameObject.AddComponent<DamageUIImagePoolingManager>().Initialize();
-    }
-
-    private void LateUpdate()
-    {
-        foreach (var image in activeGroup)
-        {
-            image.transform.position += Vector3.up * 2;
-        }
     }
 
     public void printDamage(int damage, Vector3 position, DamageType damageType = DamageType.Normal)
@@ -58,7 +45,7 @@ public class DamageUI : UIManagerBase
         {
             Debug.LogError($"Input minus damage {damage}");
         }
-        
+
         // var screenPosition = RectTransformUtility.WorldToScreenPoint(Camera.main, position);
         var screenPosition = RectTransformUtility.WorldToScreenPoint(CameraManager.GetInstance.MainCamera, position);
         screenPosition += new Vector2(0, FloatingHeight);
@@ -69,8 +56,8 @@ public class DamageUI : UIManagerBase
         wrapper.transform.position = screenPosition;
         wrapper.SetDamage(damage, damageType, FloatTime);
         wrapper.AddAnimation(DamageUIAnimations.Floating(wrapper.transform, FloatingHeight, FloatTime))
-            .AddAnimation(DamageUIAnimations.SizeHighlighting(wrapper.transform, Vector3.one, Vector3.one * 2f, 0.05f, 1.2f))
-            .AddAnimation(DamageUIAnimations.SizeHighlighting(wrapper.transform, Vector3.one, Vector3.one * 2f, 0.2f, 0.8f))
+            .AddAnimation(DamageUIAnimations.SizeHighlighting(wrapper.transform, Vector3.one * 0.3f, Vector3.one * 0.5f, 0.05f, 1.2f))
+            //.AddAnimation(DamageUIAnimations.SizeHighlighting(wrapper.transform, Vector3.one, Vector3.one * 2f, 0.2f, 0.8f))
             .AddAnimation(DamageUIAnimations.Shaking(wrapper.transform, 15f, 4, 0.7f))
             .AddAnimation(DamageUIAnimations.Dissolve(wrapper.activeGroup, 2f, 1.0f));
         wrapper.StartAnimation();
@@ -78,9 +65,7 @@ public class DamageUI : UIManagerBase
     public override void OnUpdateUI(float p_DeltaTime)
     {
     }
-
     public override void DisposeUnManaged()
     {
     }
 }
-
