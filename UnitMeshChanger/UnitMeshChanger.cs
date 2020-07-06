@@ -144,7 +144,8 @@ namespace k514
 
             for (var i = 0; i < list.Length; i++)
             {
-                ChangeUnitPart(list[i]);
+                if(!ChangeUnitPart(list[i]))
+                    Debug.LogError($"Fail Unit Mesh Change. Item key : {list[i]}");;
             }
         }
         
@@ -236,11 +237,15 @@ namespace k514
                         // 그것을 방지 하기 위해 원본 스킨 렌더러의 메쉬를 제거하고 남겨놓는다.
                         child[i].GetComponent<SkinnedMeshRenderer>().sharedMesh = null;
                         
-                        // 트렌스폼을 레퍼로 재활용
                         child[i].name = unitPartString;
-                        var wrapper = child[i].gameObject.AddComponent<LamiereUnitPartWrapper>();
-                        wrapper.Initialize(unitParts);
-                        _MeshWrapperCollection.Add(unitParts, wrapper);
+                        
+                        // 트렌스폼을 레퍼로 재활용
+                        if (!_MeshWrapperCollection.ContainsKey(unitParts))
+                        {
+                            var wrapper = child[i].gameObject.AddComponent<LamiereUnitPartWrapper>();
+                            wrapper.Initialize(unitParts);
+                            _MeshWrapperCollection.Add(unitParts, wrapper);
+                        }
 
                         break;
                     }
