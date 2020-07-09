@@ -44,6 +44,11 @@ namespace BDG
 
         public void PoolObject(T obj)
         {
+            if (obj == null)
+            {
+                Debug.LogError("Pool null reference");
+                return;
+            }
             OnPooled(obj);
             _pool.Push(obj);
         }
@@ -103,6 +108,11 @@ namespace BDG
 
         public void PoolObject(GameObject obj)
         {
+            if (obj == null)
+            {
+                Debug.LogError("Pool null reference");
+                return;
+            }
             OnPooled(obj);
             _pool.Push(obj);
         }
@@ -163,6 +173,11 @@ namespace BDG
 
         public void PoolObject(T obj)
         {
+            if (obj == null)
+            {
+                Debug.LogError("Pool null reference");
+                return;
+            }
             OnPooled(obj);
             _pool.Push(obj);
         }
