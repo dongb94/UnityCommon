@@ -46,8 +46,19 @@ public class DamageUI : UIManagerBase
             Debug.LogError($"Input minus damage {damage}");
         }
 
+        var mainCamera = CameraManager.GetInstance.MainCamera;
+        
+        // 카메라 기준 데미지를 표기할 월드좌표 벡터
+        var printVector = (position - mainCamera.transform.position);
+        // 카메라가 보고있는 방향 벡터
+        var cameraVector = mainCamera.transform.forward;
+        // 내적을 이용해서 카메라 앞인지 뒤인지를 판별한다. 뒤쪽이면 리턴.
+        if (printVector.x * cameraVector.x 
+            + printVector.y * cameraVector.y 
+            + printVector.z * cameraVector.z < 0) return;
+
         // var screenPosition = RectTransformUtility.WorldToScreenPoint(Camera.main, position);
-        var screenPosition = RectTransformUtility.WorldToScreenPoint(CameraManager.GetInstance.MainCamera, position);
+        var screenPosition = RectTransformUtility.WorldToScreenPoint(mainCamera, position);
         screenPosition += new Vector2(0, FloatingHeight);
         // Debug.Log("Screen H W : "+ Screen.width+" x "+Screen.height);
         // Debug.Log(position +" ====> " + screenPosition);
