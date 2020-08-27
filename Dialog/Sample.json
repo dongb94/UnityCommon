@@ -1,0 +1,58 @@
+{
+  "1": {
+    "RightCharacter": [ "Hanagi", true ],
+    "LeftCharacter": [ "Empty", false ],
+    "Name": [ "하나기" ],
+    "Text": [
+      "마이크 테스트 1,2,3",
+      "하나기 하나기 응답하라\n오버~"
+    ]
+  },
+  "2": {
+    "RightCharacter": [ "Hanagi", false ],
+    "LeftCharacter": [ "Hanagi", true ],
+    "Name": [ "하나기2" ],
+    "Text": [
+      "아아 하나기 나왔다 오버.",
+      "송신자는 누구인가?"
+    ]
+  },
+  "3": {
+    "RightCharacter": [ "Hanagi", true ],
+    "LeftCharacter": [ "Hanagi", false ],
+    "Name": [ "하나기" ],
+    "Text": [
+      "하나기다."
+    ]
+  },
+  "4": {
+    "RightCharacter": [ "Hanagi", false ],
+    "LeftCharacter": [ "Hanagi", true ],
+    "Text": [
+      "음?"
+    ]
+  },
+  "5": {
+    "RightCharacter": [ "Hanagi", true ],
+    "LeftCharacter": [ "Hanagi", false ],
+    "Name": [ "하나기" ],
+    "Text": [
+      "응??"
+    ]
+  },
+  "6": {
+    "RightCharacter": [ "Hanagi", false ],
+    "LeftCharacter": [ "Hanagi", true ],
+    "Text": [
+      "???"
+    ]
+  },
+  "7": {
+    "RightCharacter": [ "Hanagi", true ],
+    "LeftCharacter": [ "Hanagi", true ],
+    "Name": [ "하나기들" ],
+    "Text": [
+      "???????????????????"
+    ]
+  }
+}
