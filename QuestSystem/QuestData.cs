@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Almond.GameData;
-using Almond.Util;
 using k514;
 using UnityEngine;
 
@@ -24,6 +22,10 @@ public class QuestData : GameData<QuestData, int, QuestData.TableRecord>
         public List<int> questCondition { get; set; }
         public List<int> sceneNumber { get; set; }
 
+        
+        /// ////////////////////////////////
+        
+        
         private List<Vector3> targetVector;
     
         public List<Vector3> TargetVector

@@ -2,15 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Almond.Game;
 using UnityEngine;
 
 public class MultiQuestSystem
 {
     public static MultiQuestSystem Instance = new MultiQuestSystem();
     
-    private Dictionary<int, QuestData.TableRecord> ClearedQuestDataSet;
-    private HashSet<QuestData.TableRecord> FeasibleQuestDataSet;
+    private Dictionary<int, QuestData.TableRecord> ClearedQuestDataSet; // 클리어한 퀘스트 목록
+    private HashSet<QuestData.TableRecord> FeasibleQuestDataSet; // 시작 가능한 퀘스트 목록
     private HashSet<QuestData.TableRecord> QuestDataSet;
 
     private enum QuestType
@@ -64,14 +63,15 @@ public class MultiQuestSystem
         foreach (var questNum in baseQuestNumList)
         {
             CheckFeasible(questNum);
-            QuestStart(questNum); // for test TODO Delete
+            QuestStart(questNum); // <-- for test 퀘스트 시작 테스트용 코드 TODO Delete
         }
     }
     
     public void QuestStart(int questId)
     {
         var quest = QuestData.GetQuestData(questId);
-        if (!FeasibleQuestDataSet.Contains(quest) || quest.needLevel > MogoWorld.thePlayer.level) return; // TODO 나중에 조건 분리, 레벨 부족은 따로 표시해줘야 할 수 도 있음
+        // if (quest.needLevel > MogoWorld.thePlayer.level) return; // 레벨 제한 확인 check player level
+        if (!FeasibleQuestDataSet.Contains(quest)) return; // 시작 가능한 퀘스트 목록에 포함되어 있는지 확인
         FeasibleQuestDataSet.Remove(quest);
         QuestDataSet.Add(quest);
         
@@ -85,7 +85,8 @@ public class MultiQuestSystem
         var questData = QuestData.GetQuestData(questId);
         if (!QuestDataSet.Contains(questData)) return;
         QuestDataSet.Remove(questData);
-        ClearedQuestDataSet.Add(questData.id, questData);
+        if(!ClearedQuestDataSet.ContainsKey(questData.id))
+            ClearedQuestDataSet.Add(questData.id, questData);
         
         // TODO send questClear information to server
         
@@ -469,21 +470,34 @@ public class MultiQuestSystem
     {   
         var progress = quest.QuestProgress[targetIndex];
         var complete = quest.questCondition[targetIndex];
-        Debug.Log(quest.id +" quest "+targetIndex+" "+complete);
+#if UNITY_EDITOR
+        Debug.Log($"{quest.id} quest : {targetIndex}->{progress}/{complete}");
+#endif
         if (progress < complete)
         {
             ++quest.QuestProgress[targetIndex];
             UpdateQuestListUI(quest);
         }
+        else
+        {
+            // 해당 목표 초과 달성
+        }
     }
     
     private void UpdateNumberOfItem(QuestData.TableRecord quest, int targetIndex, int itemIndex)
     {
-        var num = InventoryManager.GetInstance[itemIndex]._Stack;
-        quest.QuestProgress[targetIndex] = num;
-        UpdateQuestListUI(quest);
+//        var num = InventoryManager.GetInstance[itemIndex]._Stack;
+//        quest.QuestProgress[targetIndex] = num;
+//        UpdateQuestListUI(quest);
     }
 
+    /// <summary>
+    /// 입력 백터가 지정된 공간(3D) 안 인지 확인
+    /// </summary>
+    /// <param name="position">확인할 백터(입력 백터)</param>
+    /// <param name="location">지정 공간 위치(중앙값)</param>
+    /// <param name="range">지정 공간 범위</param>
+    /// <returns></returns>
     private bool checkInLocation(Vector3 position, Vector3 location, Vector3 range)
     {
         return location.x - range.x < position.x && location.x + range.x < position.x
