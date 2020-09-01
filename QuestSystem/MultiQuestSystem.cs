@@ -6,8 +6,18 @@ using UnityEngine;
 
 public class MultiQuestSystem
 {
-    public static MultiQuestSystem Instance = new MultiQuestSystem();
-    
+    private static MultiQuestSystem instance;
+
+    public static MultiQuestSystem Instance
+    {
+        get
+        {
+            if(instance == null)
+                instance = new MultiQuestSystem();;
+            return instance;
+        }
+    }
+
     private Dictionary<int, QuestData.TableRecord> ClearedQuestDataSet; // 클리어한 퀘스트 목록
     private HashSet<QuestData.TableRecord> FeasibleQuestDataSet; // 시작 가능한 퀘스트 목록
     private HashSet<QuestData.TableRecord> QuestDataSet;
@@ -47,7 +57,7 @@ public class MultiQuestSystem
         foreach (var questNum in clearedQuestNumList)
         {
             var quest = QuestData.GetQuestData(questNum);
-            ClearedQuestDataSet.Add(quest.id, quest);            
+            ClearedQuestDataSet.Add(quest.KEY, quest);            
         }
 
         foreach (var questSet in ClearedQuestDataSet)
@@ -62,6 +72,9 @@ public class MultiQuestSystem
 
         foreach (var questNum in baseQuestNumList)
         {
+#if QUEST_DEBUG
+            Debug.Log($" Quest base init {questNum}");
+#endif
             CheckFeasible(questNum);
             QuestStart(questNum); // <-- for test 퀘스트 시작 테스트용 코드 TODO Delete
         }
@@ -85,8 +98,8 @@ public class MultiQuestSystem
         var questData = QuestData.GetQuestData(questId);
         if (!QuestDataSet.Contains(questData)) return;
         QuestDataSet.Remove(questData);
-        if(!ClearedQuestDataSet.ContainsKey(questData.id))
-            ClearedQuestDataSet.Add(questData.id, questData);
+        if(!ClearedQuestDataSet.ContainsKey(questData.KEY))
+            ClearedQuestDataSet.Add(questData.KEY, questData);
         
         // TODO send questClear information to server
         
@@ -374,7 +387,7 @@ public class MultiQuestSystem
                         {
                             var entityId = quest.questTarget[i];
                             var itemId = quest.questTarget[i + 1];
-                            if (InventoryManager.GetInstance[itemId]._Stack <= 0) break;
+                            // if (InventoryManager.GetInstance[itemId]._Stack <= 0) break;
                             if (target == entityId)
                             {
                                 UpdateQuestProgress(quest, i / 2);
@@ -394,8 +407,34 @@ public class MultiQuestSystem
             }
         }
     }
+
+    public void QuestEvent(int eventId, int[] position)
+    {
+#if QUEST_DEBUG
+        Debug.Log($"Quest Count{QuestDataSet.Count}");
+#endif
+        foreach (var quest in QuestDataSet)
+        {
+#if QUEST_DEBUG
+            Debug.Log($"Quest : {quest.KEY} : {quest.eventId}");
+#endif
+            if (quest.eventId == eventId)
+            {
+                switch (eventId)
+                {
+                    case 5 : // 정찰
+                        for (int i = 0; i < quest.targetLocation.Count; i+=4)
+                        {
+                            if(checkInLocation(position, quest.targetLocation[i], quest.targetLocation[i+1], quest.targetLocation[i+2], quest.targetLocation[i+3], quest.targetLocationSize[i/2], quest.targetLocationSize[i/2+1]))
+                                UpdateQuestProgress(quest, i/4);
+                        }
+                        break;
+                }
+            }
+        }
+    }
     
-    public void QuestEvent(int eventId, int target, Vector3 position)
+    public void QuestEvent(int eventId, int target, int[] position)
     {
         foreach (var quest in QuestDataSet)
         {
@@ -407,7 +446,7 @@ public class MultiQuestSystem
                         for (int i = 0; i < quest.questTarget.Count; i++)
                         {
                             var targetId = quest.questTarget[i];
-                            if(target == targetId && checkInLocation(position, quest.TargetVector[i], quest.TargetVectorSize[i]))
+                            if(target == targetId && checkInLocation(position, quest.targetLocation[i*4], quest.targetLocation[i*4+1], quest.targetLocation[i*4+2], quest.targetLocation[i*4+3], quest.targetLocationSize[i*2], quest.targetLocationSize[i*2+1]));
                                 UpdateQuestProgress(quest, i);
                         }
                         break;
@@ -418,7 +457,9 @@ public class MultiQuestSystem
     
     public void QuestEvent(int eventId, int target1, int target2)
     {
+#if QUEST_DEBUG
         Debug.Log("QuestEventSend // id = "+ eventId + (QuestMissionType)eventId + ", targetId = " + target1 + " & " + target2);
+#endif
         foreach (var quest in QuestDataSet)
         {
             if (quest.eventId == eventId)
@@ -470,8 +511,8 @@ public class MultiQuestSystem
     {   
         var progress = quest.QuestProgress[targetIndex];
         var complete = quest.questCondition[targetIndex];
-#if UNITY_EDITOR
-        Debug.Log($"{quest.id} quest : {targetIndex}->{progress}/{complete}");
+#if QUEST_DEBUG
+        Debug.Log($"{quest.KEY} quest : {targetIndex}->{progress}/{complete}");
 #endif
         if (progress < complete)
         {
@@ -481,6 +522,22 @@ public class MultiQuestSystem
         else
         {
             // 해당 목표 초과 달성
+        }
+        
+        bool completeQuest = true;
+        for (int i = 0; i < quest.questCondition.Count; i++)
+        {
+            if (quest.questCondition[i] != quest.QuestProgress[i])
+            {
+                completeQuest = false;
+                break;
+            }
+        }
+
+        if (completeQuest)
+        {
+            QuestClear(quest.KEY);
+            Debug.Log($"///Quest Clear/// Quest : {quest.KEY} {quest.questName}");
         }
     }
     
@@ -505,12 +562,37 @@ public class MultiQuestSystem
                && location.z - range.z < position.z && location.z + range.z < position.z;                                       
     }
 
+    /// <summary>
+    /// Custom check
+    /// 커스텀 좌표계
+    /// </summary>
+    /// <returns></returns>
+    private bool checkInLocation(int[] position, int qMX, int qMY, int qX, int qY, int sizeX, int sizeY)
+    {
+        if (position.Length != 4)
+        {
+            Debug.LogError($"position length error : length {position.Length}");
+            return false;
+        }
+
+        int mapX = qMX * 60 + qX;
+        int mapY = qMY * 60 + qY;
+
+        int positionX = position[0] * 60 + position[2];
+        int positionY = position[1] * 60 + position[3];
+
+        Debug.Log($"{mapX},{mapY},{positionX},{positionY},{sizeX},{sizeY}");
+        
+        return (positionX >= mapX - sizeX) && (positionX <= mapX + sizeX)
+            && (positionY >= mapY - sizeY) && (positionY <= mapY + sizeY);
+    }
+
     private void changeScene(int sceneId)
     {
-        if (sceneId != MogoWorld.thePlayer.sceneId)
-        {
-            // TODO 맵 이동에 관한 UI 알림
-            MogoWorld.thePlayer.sceneId = (ushort)sceneId;
-        }
+//        if (sceneId != MogoWorld.thePlayer.sceneId)
+//        {
+//            // TODO 맵 이동에 관한 UI 알림
+//            MogoWorld.thePlayer.sceneId = (ushort)sceneId;
+//        }
     }
 }

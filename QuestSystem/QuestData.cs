@@ -2,11 +2,20 @@ using System.Collections.Generic;
 using k514;
 using UnityEngine;
 
+/// <summary>
+/// TODO 퀘스트 그룹 단위로 변경 (한 퀘스트 안에 여러종류의 미션이 있는 경우 대응) 미션 그룹 -> 미션 -> 세부 작업
+///
+/// 추가 필요한 변수
+/// 1. 미션 그룹 key (id는 미션id 로 대체)
+/// 2. 세부 미션 그룹 (미션 그룹 내부의 진행 단계별 미션 그룹)
+///
+/// 미션 그룹 추가시 각 미션은 간략화 할 수 있음. 이거 중요
+/// </summary>
 public class QuestData : GameData<QuestData, int, QuestData.TableRecord>
 {
     public class TableRecord : GameDataInstance
     {
-        public int id { get; set; }
+        public int id { get; set; } // 미션 ID로 쓸 예정
         public int type { get; set; } // 1 = main, 2 = sub, 3 = daily (반복퀘스트는 sub)
         public int eventId { get; set; } // 수행의뢰 종류
         public int needLevel { get; set; }
