@@ -89,8 +89,6 @@ public class DialogManager : Singleton<DialogManager>
 		}
 		else
 		{
-			// TODO UI update
-			//HUDManager.GetInstance.SetScriptMode();
 			StartDialog();
 		}
 	}
@@ -105,8 +103,6 @@ public class DialogManager : Singleton<DialogManager>
 		}
 		else
 		{
-			// TODO UI update
-			// HUDManager.GetInstance.SetScriptMode();
 			StartDialog();
 		}
 	}
@@ -119,17 +115,20 @@ public class DialogManager : Singleton<DialogManager>
 	{
 		var data = currentScript;
 		// TODO UI update
-//		HUDManager.GetInstance.DialogUI.SetLeftImage(data.LeftCharacter, data.LeftActive);
-//		HUDManager.GetInstance.DialogUI.SetRightImage(data.RightCharacter, data.RightActive);
-//		HUDManager.GetInstance.DialogUI.SetName(data.Name);
+		// UIDialog.Instance.SetLeftImage(data.LeftCharacter, data.LeftActive);
+		// UIDialog.Instance.SetRightImage(data.RightCharacter, data.RightActive);
+
+		Debug.Log(data.Name);
+		
+		UIDialog.Instance.SetName(data.Name);
 		DisplayNextText();
 	}
 
 	private void DisplayNextText()
 	{
 		if (currentScript.TextGroup.Count != 0) ;
-		// TODO UI update
-		// HUDManager.GetInstance.DialogUI.SetDialog(currentScript.TextGroup.Dequeue());
+		
+		UIDialog.Instance.SetDialog(currentScript.TextGroup.Dequeue());
 	}
 
 	public void NextEvent()
@@ -142,7 +141,7 @@ public class DialogManager : Singleton<DialogManager>
 			}
 			else
 			{
-				StartDialog();
+				NextDialog();
 			}
 		}
 		else
@@ -151,7 +150,14 @@ public class DialogManager : Singleton<DialogManager>
 		}
 	}
 
-	public void StartDialog()
+	private void StartDialog()
+	{
+		UIDialog.Instance.SetActive(true);
+		currentScript = currentDialog.Dequeue();
+		InitializeDialog();
+	}
+
+	private void NextDialog()
 	{
 		currentScript = currentDialog.Dequeue();
 		InitializeDialog();
@@ -159,8 +165,7 @@ public class DialogManager : Singleton<DialogManager>
 
 	public void ExitDialog()
 	{
-		// TODO UI update
-		// HUDManager.GetInstance.Deactivate = HUDManager.HUDState.Script;
+		UIDialog.Instance.SetActive(false);
 		_onExitAction?.Invoke();
 	}
 	
