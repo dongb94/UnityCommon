@@ -404,6 +404,7 @@ public class MultiQuestSystem
                         }
                         break;
                 }
+                break;
             }
         }
     }
@@ -430,6 +431,8 @@ public class MultiQuestSystem
                         }
                         break;
                 }
+
+                break;
             }
         }
     }
@@ -451,6 +454,7 @@ public class MultiQuestSystem
                         }
                         break;
                 }
+                break;
             }
         }
     }
@@ -503,6 +507,7 @@ public class MultiQuestSystem
                         }
                         break;
                 }
+                break;
             }
         }
     }
@@ -580,9 +585,9 @@ public class MultiQuestSystem
 
         int positionX = position[0] * 60 + position[2];
         int positionY = position[1] * 60 + position[3];
-
-        Debug.Log($"{mapX},{mapY},{positionX},{positionY},{sizeX},{sizeY}");
-        
+#if QUEST_DEBUG
+        Debug.Log($"--Quest Location Check--\n player({positionX},{positionY}) map({mapX},{mapY}) size({sizeX},{sizeY})");
+#endif
         return (positionX >= mapX - sizeX) && (positionX <= mapX + sizeX)
             && (positionY >= mapY - sizeY) && (positionY <= mapY + sizeY);
     }
