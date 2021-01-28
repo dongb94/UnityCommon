@@ -12,7 +12,9 @@ public class LogText
     private static uint _logStack;
     private static uint _logFileNum;
     
-    private FileStream file;
+    private static FileStream file;
+
+    private static string folderPath;
 
     public static LogText Instance => _instance ?? (_instance = new LogText());
 
@@ -20,6 +22,7 @@ public class LogText
     {
         _logFileNum = 0;
         _logStack = 0;
+        FolderSetting();
         try
         {
             while(!OpenNextLogFile());
@@ -42,24 +45,40 @@ public class LogText
     
     public void Print(string err)
     {
-        err = $"{_logStack++}:\t{err}\n";
-        var buffer = Encoding.UTF8.GetBytes(err);
-        file.Write(buffer, 0, buffer.Length);
-
-        if (CheckFileSize())
+        try
         {
-            file.Flush();
-            file.Close();
-            OpenNextLogFile();
+            err = $"{_logStack++}:\t{err}\n";
+            var buffer = Encoding.UTF8.GetBytes(err);
+            file.Write(buffer, 0, buffer.Length);
+
+            if (CheckFileSize())
+            {
+                file.Flush();
+                file.Close();
+                OpenNextLogFile();
+            }
+        }catch(Exception e)
+        {
+#if UNITY_EDITOR
+            Debug.Log(e);
+            throw;
+#endif
         }
+
     }
     
+    private void FolderSetting()
+    {
+        folderPath = $"{Environment.CurrentDirectory}/LogText/{DateTime.Now.Year}.{DateTime.Now.Month}.{DateTime.Now.Day}";
+        if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+    }
+
     public void Print(object err)
     {
         Print(err.ToString());
     }
 
-    public void Destory()
+    public static void Destory()
     {
         file?.Flush();
         file?.Close();
@@ -69,8 +88,7 @@ public class LogText
     private bool OpenNextLogFile()
     {
         _logFileNum++;
-        var path = Environment.CurrentDirectory + $"\\log{_logFileNum}.txt";
-
+        var path = $"{folderPath}/log{_logFileNum}.txt";
         try
         {
             file = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
