@@ -43,46 +43,56 @@ namespace DefaultNamespace
             var t = notValue.GetType();
             if (t.IsValueType && !IsStruct(t)) // Value && Enum
             {
-                Debug.Log($"{str}Value : \t{notValue}");
+                Debug.Log($"{str}\t{t.Name} : \t{notValue}");
             }
             else if(t.IsArray)                                // Array
             {
                 str += "\t";
+                var i = 0;
                 foreach (var item in (Array) notValue)
                 {
-                    printValue(item, str);
+                    printValue(item, $"{str}[{i}]");
+                    i++;
                 }
             }
             else if(typeof(IList).IsAssignableFrom(t))        // List
             {
                 str += "\t";
+                var i = 0;
                 foreach (var item in (IList) notValue)
                 {
-                    printValue(item, str);
+                    printValue(item, $"{str}[{i}]");
+                    i++;
                 }
             }
             else if(typeof(IDictionary).IsAssignableFrom(t)) // Dictionary
             {
                 str += "\t";
+                var i = 0;
                 foreach (var item in (IDictionary) notValue)
                 {
-                    printValue(item, str);
+                    printValue(item, $"{str}[{i}]");
+                    i++;
                 }
             }
             else if(typeof(Queue).IsAssignableFrom(t)) // Queue
             {
                 str += "\t";
+                var i = 0;
                 foreach (var item in (Queue) notValue)
                 {
-                    printValue(item, str);
+                    printValue(item, $"{str}[{i}]");
+                    i++;
                 }
             }
             else if(typeof(Stack).IsAssignableFrom(t)) // Stack
             {
                 str += "\t";
+                var i = 0;
                 foreach (var item in (Stack) notValue)
                 {
-                    printValue(item, str);
+                    printValue(item, $"{str}[{i}]");
+                    i++;
                 }
             }
             else if(IsStruct(t) || t.IsClass) // Struct || Class
@@ -100,7 +110,7 @@ namespace DefaultNamespace
                               +$"{str}IsPrimitive : \t{field.FieldType.IsPrimitive}\n"
                               +$"{str}----------------------------------------"
                               );
-                    printValue(field.GetValue(notValue), str);
+                    printValue(field.GetValue(notValue), str+field.Name);
                 }
             }
 
