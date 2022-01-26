@@ -41,7 +41,7 @@ namespace DefaultNamespace
         private string printValue(object notValue, string str = "")
         {
             var t = notValue.GetType();
-            if (t.IsValueType && !IsStruct(t)) // Value && Enum
+            if ((t.IsValueType && !IsStruct(t))||typeof(string).IsAssignableFrom(t)) // Value && Enum
             {
                 Debug.Log($"{str}\t{t.Name} : \t{notValue}");
             }
@@ -116,8 +116,5 @@ namespace DefaultNamespace
 
             return str;
         }
-        
-        
-        
     }
 }
