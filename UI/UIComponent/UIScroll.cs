@@ -9,8 +9,8 @@ namespace UI2020.UIComponent
         private float _xInterval, _yInterval;
         private int _nOfContent;
 
-        private AbstractPrefabPoolingManager<T> _scrollObjectPool;
-        private List<T> _contentList;
+        private UnityPrefabObjectPool<T> _scrollObjectPool;
+        public List<T> _contentList;
 
         private RectTransform _content;
 
@@ -22,25 +22,25 @@ namespace UI2020.UIComponent
             _contentList = new List<T>();
         }
         
-        public UIScroll(AbstractPrefabPoolingManager<T> scrollObjectPool) : this()
+        public UIScroll(UnityPrefabObjectPool<T> scrollObjectPool) : this()
         {
             _scrollObjectPool = scrollObjectPool;
             _content = _scrollObjectPool.GetComponent<RectTransform>();
         }
         
-        public UIScroll(AbstractPrefabPoolingManager<T> scrollObjectPool, int xInterval, int yInterval) : this(scrollObjectPool)
+        public UIScroll(UnityPrefabObjectPool<T> scrollObjectPool, int xInterval, int yInterval) : this(scrollObjectPool)
         {
             _xInterval = xInterval;
             _yInterval = yInterval;
         }
         
-        public UIScroll(AbstractPrefabPoolingManager<T> scrollObjectPool, RectTransform content) : this()
+        public UIScroll(UnityPrefabObjectPool<T> scrollObjectPool, RectTransform content) : this()
         {
             _scrollObjectPool = scrollObjectPool;
             _content = content;
         }
         
-        public UIScroll(AbstractPrefabPoolingManager<T> scrollObjectPool, RectTransform content, int xInterval, int yInterval) : this(scrollObjectPool,content)
+        public UIScroll(UnityPrefabObjectPool<T> scrollObjectPool, RectTransform content, int xInterval, int yInterval) : this(scrollObjectPool,content)
         {
             _xInterval = xInterval;
             _yInterval = yInterval;
