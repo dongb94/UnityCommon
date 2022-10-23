@@ -1,10 +1,9 @@
-using BDG;
 using UnityEngine;
 
-namespace UI2020
+namespace BDG
 {
     /// <summary>
-    /// UI 프리펩 오브젝트 풀을 싱글톤으로 사용하기 위한 추상클레스
+    /// 프리펩 오브젝트 풀을 싱글톤으로 사용하기 위한 추상클레스
     /// </summary>
     public abstract class AbstractPrefabPoolingManager<T> : UnityPrefabObjectPool<T> where T : MonoBehaviour
     {
@@ -34,7 +33,7 @@ namespace UI2020
     }
     
     /// <summary>
-    /// UI 컴포넌트 풀을 싱글톤으로 사용하기 위한 추상클레스
+    /// 컴포넌트 풀을 싱글톤으로 사용하기 위한 추상클레스
     /// </summary>
     public abstract class AbstractComponentPoolingManager<T> : UnityObjectPool<T> where T : MonoBehaviour
     {
