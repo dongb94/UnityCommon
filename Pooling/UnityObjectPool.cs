@@ -146,10 +146,11 @@ namespace BDG
         protected abstract void OnActive(T obj);
         protected abstract void OnPooled(T obj);
 
-        public virtual UnityPrefabObjectPool<T> Initialize()
+        public abstract string SetPrefab(string prefabName);
+
+        public virtual void Awake()
         {
             _pool = new Stack<T>();
-            return this;
         }
 
         protected virtual void OnDestroy()
@@ -166,6 +167,7 @@ namespace BDG
 
             var obj = _pool.Pop();
             OnActive(obj);
+            obj.gameObject.SetActive(true);
             return obj;
         }
 
@@ -177,6 +179,7 @@ namespace BDG
                 return;
             }
             OnPooled(obj);
+            obj.gameObject.SetActive(false);
             _pool.Push(obj);
         }
 
@@ -189,8 +192,7 @@ namespace BDG
                 Debug.LogError($"Resource Load Error : {prefabName}");
             //var obj = Instantiate(Resources.Load<GameObject>(prefabName),transform).AddComponent<T>(); // 임시
             OnCreate(obj);
-            OnPooled(obj);
-            _pool.Push(obj);
+            PoolObject(obj);
         }
     }
 }
