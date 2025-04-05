@@ -10,16 +10,13 @@
     {
         private void Update()
         {
-            // 마우스 버튼 눌렀을 때
             if (Input.GetMouseButtonDown(0))
             {
-                CursorManager.Instance.SetCursorTexture(CursorType.Click);
+                CursorManager.Instance.SetCursor(CursorType.Click);
             }
-
-            // 마우스 버튼에서 손 뗐을 때
-            if (Input.GetMouseButtonUp(0))
+            else if (Input.GetMouseButtonUp(0))
             {
-                CursorManager.Instance.SetCursorTexture(CursorType.Default);
+                CursorManager.Instance.SetCursor(CursorType.Default);
             }
         }
     }
