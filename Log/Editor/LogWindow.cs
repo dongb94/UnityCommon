@@ -28,7 +28,6 @@ public class CustomLogViewer : EditorWindow
 
 	private void OnEnable()
 	{
-		LogWarning("Test Log", LogTag.Editor, this);
 		logFilePath = Application.persistentDataPath + CustomUnityLogger.LOG_FILE_EDITOR_JSON_PATH;
 		EditorApplication.update += PollLogFile;
 	}
