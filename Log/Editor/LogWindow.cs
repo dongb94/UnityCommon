@@ -4,21 +4,25 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Search;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static LogHelper;
 
 public class CustomLogViewer : EditorWindow
 {
-	private Vector2 scrollPosition;
-	private List<LogEntry> logs = new();
-	private LogLevel filterLevel = LogLevel.Debug;
-	private LogTag tag = LogTag.All;
+	private static readonly float _repaintInterval = 1.0f; // 1초마다 갱신
+
+	private Vector2 _scrollPosition;
+	private List<LogEntry> _logs = new();
+	private List<string> _searchingCash = new();
+	private LogLevel _filterLevel = LogLevel.Debug;
+	private LogTag _tag = LogTag.All;
 
 	// 검색 관련 변수
-	private string searchQuery = "";
-	private bool isSearching = false;
+	private string _searchQuery = "";
+	private bool _isSearching = false;
 
-	private string logFilePath;
-	private double lastReadTime;
+	private string _logFilePath;
+	private double _lastReadTime;
 
 	[MenuItem("Window/Custom Log Viewer")]
 	public static void ShowWindow()
@@ -28,7 +32,7 @@ public class CustomLogViewer : EditorWindow
 
 	private void OnEnable()
 	{
-		logFilePath = Application.persistentDataPath + CustomUnityLogger.LOG_FILE_EDITOR_JSON_PATH;
+		_logFilePath = Application.persistentDataPath + CustomUnityLogger.LOG_FILE_EDITOR_JSON_PATH;
 		EditorApplication.update += PollLogFile;
 	}
 
@@ -39,19 +43,19 @@ public class CustomLogViewer : EditorWindow
 
 	private void PollLogFile()
 	{
-		if (EditorApplication.timeSinceStartup - lastReadTime < 1.0)
+		if (EditorApplication.timeSinceStartup - _lastReadTime < _repaintInterval)
 			return;
 
-		lastReadTime = EditorApplication.timeSinceStartup;
+		_lastReadTime = EditorApplication.timeSinceStartup;
 
 		// Log(logFilePath, LogTag.Editor, this);
-		if (!File.Exists(logFilePath))
+		if (!File.Exists(_logFilePath))
 			return;
 
-		string tempPath = logFilePath + ".bak";
+		string tempPath = _logFilePath + ".bak";
 		try
 		{
-			File.Move(logFilePath, tempPath);
+			File.Move(_logFilePath, tempPath);
 		}
 		catch(IOException) 
 		{
@@ -70,7 +74,8 @@ public class CustomLogViewer : EditorWindow
 				continue;
 
 			var entry = JsonUtility.FromJson<LogEntry>(line);
-			logs.Add(entry);
+			_logs.Add(entry);
+			_searchingCash.Add(entry.message.ToLower());
 		}
 
 		Repaint();
@@ -89,19 +94,47 @@ public class CustomLogViewer : EditorWindow
 		DrawFilterControls();
 		DrawSearchBar();
 
-		scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+		string lowerQuery = _searchQuery.ToLower();
 
-		foreach (var log in logs)
+		float lineHeight = 20f;
+		int totalVisibleLogs = 0;
+
+		// 필터 적용된 로그만 추출
+		List<LogEntry> filtered = new();
+		for (int i = 0; i < _logs.Count; i++)
 		{
-			if (log.level < filterLevel || !tag.HasFlag(log.tag))
+			var log = _logs[i];
+			if (log.level < _filterLevel || !_tag.HasFlag(log.tag))
 				continue;
 
-			if (isSearching && !string.IsNullOrEmpty(searchQuery) &&
-				!log.message.ToLower().Contains(searchQuery.ToLower()))
+			if (_isSearching && !_searchingCash[i].Contains(lowerQuery))
 				continue;
 
-			DrawLogEntry(log, leftAlignedStyle);
+			filtered.Add(_logs[i]);
 		}
+
+		totalVisibleLogs = filtered.Count;
+
+		// 스크롤 시작
+		_scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
+
+		// 보여질 인덱스 계산
+		int totalCount = filtered.Count;
+		int startIndex = Mathf.FloorToInt(_scrollPosition.y / lineHeight);
+		int visibleCount = Mathf.CeilToInt(position.height / lineHeight);
+		int endIndex = Mathf.Min(totalCount, startIndex + visibleCount);
+
+		// 상단 건너뛰기
+		GUILayout.Space(startIndex * lineHeight);
+
+		// 실제 렌더링
+		for (int i = startIndex; i < endIndex; i++)
+		{
+			DrawLogEntry(filtered[i], leftAlignedStyle);
+		}
+
+		// 하단 공간 확보 (나머지 줄 만큼)
+		GUILayout.Space((totalCount - endIndex) * lineHeight);
 
 		GUILayout.EndScrollView();
 	}
@@ -114,23 +147,23 @@ public class CustomLogViewer : EditorWindow
 		GUILayout.Label("🔍Search:", GUILayout.Width(70));
 
 		// 이전 검색어 저장
-		string prevSearch = searchQuery;
+		string prevSearch = _searchQuery;
 
 		// 검색창 표시
-		searchQuery = GUILayout.TextField(searchQuery);
+		_searchQuery = GUILayout.TextField(_searchQuery);
 
 		// 검색어가 변경되었는지 확인
-		if (searchQuery != prevSearch)
+		if (_searchQuery != prevSearch)
 		{
-			isSearching = !string.IsNullOrEmpty(searchQuery);
-			scrollPosition = Vector2.zero;
+			_isSearching = !string.IsNullOrEmpty(_searchQuery);
+			_scrollPosition = Vector2.zero;
 		}
 
 		// 검색창 클리어 버튼
-		if (isSearching && GUILayout.Button("X", GUILayout.Width(20)))
+		if (_isSearching && GUILayout.Button("X", GUILayout.Width(20)))
 		{
-			searchQuery = "";
-			isSearching = false;
+			_searchQuery = "";
+			_isSearching = false;
 			GUI.FocusControl(null); // 포커스 해제
 		}
 
@@ -167,11 +200,11 @@ public class CustomLogViewer : EditorWindow
 	{
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("Log Level Filter", GUILayout.Width(120));
-		filterLevel = (LogLevel)EditorGUILayout.EnumPopup(filterLevel);
+		_filterLevel = (LogLevel)EditorGUILayout.EnumPopup(_filterLevel);
 		GUILayout.EndHorizontal();
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("Log Tag Filter", GUILayout.Width(120));
-		tag = (LogTag)EditorGUILayout.EnumFlagsField(tag);
+		_tag = (LogTag)EditorGUILayout.EnumFlagsField(_tag);
 		GUILayout.EndHorizontal();
 	}
 
@@ -186,9 +219,9 @@ public class CustomLogViewer : EditorWindow
 		GUILayout.Label($"[{log.tag}]", tagStyle, GUILayout.Width(70));
 
 		// 검색어 하이라이트 기능 추가
-		if (isSearching && !string.IsNullOrEmpty(searchQuery))
+		if (_isSearching && !string.IsNullOrEmpty(_searchQuery))
 		{
-			DrawHighlightedText(log.level, log.message, searchQuery, baseStyle);
+			DrawHighlightedText(log.level, log.message, _searchQuery, baseStyle);
 		}
 		else
 		{
